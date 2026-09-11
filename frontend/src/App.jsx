@@ -1,20 +1,25 @@
-import { signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "../firebase";
-import { login } from "./features/login";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { me } from "./features/me";
+import { setUserData } from "./redux/userSlice";
 
 const App = () => {
-  const handleLogin = async () => {
-    const data = await signInWithPopup(auth, googleProvider)
-    const token = await data.user.getIdToken();
-    const result = await login(token)
-    console.log(result)
-  }
+  const dispatch = useDispatch()
+  useEffect(()=> {
+    const fetch = async () => {
+      const data = await me();
+      dispatch(setUserData(data))
+    }
+    fetch()
+  }, )
   return (
-    <div>
-      <button className="bg-amber-600" onClick={handleLogin} >
-        Continue with Google
-      </button>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Dashboard/>} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 

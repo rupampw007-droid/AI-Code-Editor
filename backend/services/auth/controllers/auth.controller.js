@@ -3,7 +3,6 @@ import { app } from "../config/firebase.js";
 import User from "../models/user.model.js";
 import crypto from "crypto";
 import redis from "../../../shared/redis/redis.js";
-import { strict } from "assert";
 
 export const login = async (req, res) => {
   try {
@@ -11,15 +10,15 @@ export const login = async (req, res) => {
     const decoded = await getAuth(app).verifyIdToken(token);
 
     let user = await User.findOne({
-      firebaseUid: decoded.uid,
+      firebaseId: decoded.uid,
     });
 
     if (!user) {
       user = await User.create({
-        firebaseUid: decoded.uid,
-        name: decoded.name,
+        firebaseId: decoded.uid,
+        name: decoded.name || decoded.email?.split("@")[0] || "User",
         email: decoded.email,
-        avatar: decoded.picture,
+        avatar: decoded.picture || "",
       });
     }
 
@@ -29,7 +28,7 @@ export const login = async (req, res) => {
       `session-${sessionId}`,
       JSON.stringify({
         name: user.name,
-        userId: user._id,
+        _id: user._id,
         email: user.email,
         avatar: user.avatar,
       }),
@@ -45,8 +44,9 @@ export const login = async (req, res) => {
     });
     return res.status(200).json(user);
   } catch (err) {
+    console.error("Login error:", err);
     return res.status(500).json({
-      message: `Login error ${err}`,
+      message: err.message || "Login failed",
     });
   }
 };

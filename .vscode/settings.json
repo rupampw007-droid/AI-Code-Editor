@@ -1,3 +1,4 @@
 {
-    "mos.port": ""
+    "mos.port": "",
+    "js/ts.experimental.useTsgo": false
 }
