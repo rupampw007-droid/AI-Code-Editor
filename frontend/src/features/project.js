@@ -52,7 +52,7 @@ export const toggleStar = async (id) => {
 
 export const deleteProject = async (id) => {
     try {
-        const {data} = await api.patch(`/api/project/${id}`)
+        const {data} = await api.delete(`/api/project/${id}`)
         return data 
     } catch (error) {
         console.log(error)
