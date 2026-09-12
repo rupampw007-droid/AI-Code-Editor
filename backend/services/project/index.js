@@ -1,0 +1,20 @@
+import express from 'express'
+import dotenv from 'dotenv'
+import { connectDb } from './config/db.js';
+import router from './routes/project.route.js';
+dotenv.config()
+const app = express()
+
+app.use(express.json())
+
+const port = process.env.PORT || 8082
+
+app.use('/', router)
+app.get('/', (req,res) => {
+    res.json('Hello from project service')
+})
+
+app.listen(port, () =>{
+    connectDb();
+    console.log(`Auth Service started at ${port}`)
+})
