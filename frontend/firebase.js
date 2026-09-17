@@ -4,7 +4,7 @@ import {getAuth, GoogleAuthProvider} from 'firebase/auth'
 // import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_API_URL,
+  apiKey: "AIzaSyAm9RO9eY4kdLWmdksNOz_SvkKOXrockcs",
   authDomain: "vertexai-3b274.firebaseapp.com",
   projectId: "vertexai-3b274",
   storageBucket: "vertexai-3b274.firebasestorage.app",

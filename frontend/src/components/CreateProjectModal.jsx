@@ -12,13 +12,16 @@ const CreateProjectModal = ({openModal, onClose}) => {
     const dispatch = useDispatch()
 
     const handleCreateProject = async () => {
+      if (!name.trim()) return
+
       setLoading(true)
-    const data = await createProject({
-        name, description
-    })
-    onClose()
-    dispatch(addNewProject(data))
-    setLoading(false)
+      const data = await createProject({ name, description })
+      setLoading(false)
+
+      if (!data) return
+
+      dispatch(addNewProject(data))
+      onClose()
     }
 
   return (

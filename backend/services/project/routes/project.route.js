@@ -1,10 +1,10 @@
 import express from 'express'
-import { createProject, deleteProject, getProject, getProjectById, getStarredProjects, toggleStar } from '../controllers/project.controller';
+import { createProject, deleteProject, getProjects, getProjectById, getStarredProjects, toggleStar } from '../controllers/project.controller.js';
 
 const router = express.Router();
 
 router.post('/', createProject)
-router.get('/', getProject)
+router.get('/', getProjects)
 router.get('/starred', getStarredProjects)
 router.get('/:id', getProjectById)
 router.patch('/:id', toggleStar)
