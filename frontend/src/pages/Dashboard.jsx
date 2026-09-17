@@ -7,10 +7,10 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserData } from '../redux/userSlice';
 import NavBar from '../components/NavBar';
-import SideBar from '../components/SideBar';
+import Sidebar from '../components/Sidebar';
 import { Folder, Loader2, Menu, Plus, X } from 'lucide-react';
 import { getProjects, getStarredProjects } from '../features/project';
-import { setProjects } from '../redux/projectSlice';
+import { setProjects, setStarredProjects } from '../redux/projectSlice';
 import ProjectCard from '../components/ProjectCard';
 import CreateProjectModal from '../components/CreateProjectModal';
 
@@ -24,6 +24,7 @@ function Dashboard() {
     const dispatch = useDispatch()
     const { userData } = useSelector(state => state.user)
     const { projects, starredProjects } = useSelector(state => state.project)
+    const displayedProjects = activeSession === "starred" ? starredProjects : projects
     const handleLogin = async () => {
         setLoading(true)
         const result = await signInWithPopup(auth, googleProvider)
@@ -37,14 +38,14 @@ function Dashboard() {
     const fetchAllProjects = async () => {
         setLoadingProjects(true)
         const data = await getProjects()
-        dispatch(setProjects(data))
+        if(data) dispatch(setProjects(data))
         setLoadingProjects(false)
     }
 
     const fetchStarredProjects = async () => {
         setLoadingProjects(true)
         const data = await getStarredProjects()
-        dispatch(setProjects(data))
+        if (data) dispatch(setStarredProjects(data))
         setLoadingProjects(false)
     }
 
@@ -105,7 +106,7 @@ function Dashboard() {
                 />
                 <div className='flex min-h-0 flex-1'>
                     <div className='hidden md:block'>
-                        <SideBar activeSession={activeSession} setActiveSession={setActiveSession} />
+                        <Sidebar activeSession={activeSession} setActiveSession={setActiveSession} />
                     </div>
 
                     {mobileSideBarOpen && (
@@ -123,7 +124,7 @@ function Dashboard() {
                                         <X size={18} />
                                     </button>
                                 </div>
-                                <SideBar activeSession={activeSession} setActiveSession={setActiveSession} />
+                                <Sidebar activeSession={activeSession} setActiveSession={setActiveSession} />
                             </div>
                         </div>
                     )}
@@ -226,7 +227,7 @@ Menu
                                     className="animate-spin text-slate-400 dark:text-slate-500"
                                 />
                             </div>
-                        ) : projects?.length == 0 ? (
+                        ) : displayedProjects?.length == 0 ? (
                             <div className='mb-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white/40  px-4
                   py-12
                   sm:py-16
@@ -258,8 +259,8 @@ Menu
                   lg:grid-cols-3
                   xl:grid-cols-4
 '>
-                                {projects?.map((p) => (
-                                    <ProjectCard project={p} />
+                                {displayedProjects?.map((p) => (
+                                    <ProjectCard key={p._id} project={p} />
                                 ))}
                             </div>
                         )}

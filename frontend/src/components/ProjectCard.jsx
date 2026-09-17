@@ -11,7 +11,8 @@ function ProjectCard({ project }) {
     const [confirmDelete, setConfirmDelete] = useState(false)
     const dispatch = useDispatch()
     const navigate=useNavigate()
-    const handleToggleStar = async () => {
+    const handleToggleStar = async (e) => {
+        e.stopPropagation()
         await toggleStar(project?._id)
         dispatch(starProject(project?._id))
     }

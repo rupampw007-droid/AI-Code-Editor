@@ -10,6 +10,9 @@ const projectSlice = createSlice({
     setProjects: (state, action) => {
       state.projects = action.payload;
     },
+    setStarredProjects: (state, action) => {
+      state.starredProjects = action.payload;
+    },
     addNewProject: (state, action) => {
         state.projects.unshift(action.payload)
     },
@@ -25,5 +28,5 @@ const projectSlice = createSlice({
   },
 });
 
-export const { setProjects, addNewProject, starProject, setDeleteProject } = projectSlice.actions;
+export const { setProjects, setStarredProjects, addNewProject, starProject, setDeleteProject } = projectSlice.actions;
 export default projectSlice.reducer;

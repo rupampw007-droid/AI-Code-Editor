@@ -22,7 +22,7 @@ export const getProjects = async () => {
 
 export const getProjectById = async (id) => {
     try {
-        const {data} = await api.get(`/api/project//${id}`)
+        const {data} = await api.get(`/api/project/${id}`)
         return data
     } catch (error) {
         console.log(error)
