@@ -1,4 +1,4 @@
-import  { useMemo } from 'react'
+import React, { useMemo } from 'react'
 
 function Preview({ tree }) {
 
@@ -51,7 +51,7 @@ function Preview({ tree }) {
     }
 
     if (js) {
-      const script = `<script>\n${js}\n</script>`;
+      const script = `<script>\n${js}\n<\/script>`;
       html = html.includes("</body>") ? html.replace("</body>", `${script}</body>`) : html + script;
     }
 

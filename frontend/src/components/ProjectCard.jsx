@@ -1,9 +1,9 @@
-import  { useState } from 'react'
+import React, { useState } from 'react'
 import { motion } from "motion/react"
 import { Star, Trash2 } from 'lucide-react'
 import { deleteProject, toggleStar } from '../features/project'
 import { useDispatch } from 'react-redux'
-import { setDeleteProject, starProject } from '../redux/projectSlice'
+import { setCurrentProject, setDeleteProject, starProject } from '../redux/projectSlice'
 import { useNavigate } from 'react-router-dom'
 function ProjectCard({ project }) {
     const [loadingStar, setLoadingStar] = useState(false)
@@ -11,8 +11,7 @@ function ProjectCard({ project }) {
     const [confirmDelete, setConfirmDelete] = useState(false)
     const dispatch = useDispatch()
     const navigate=useNavigate()
-    const handleToggleStar = async (e) => {
-        e.stopPropagation()
+    const handleToggleStar = async () => {
         await toggleStar(project?._id)
         dispatch(starProject(project?._id))
     }

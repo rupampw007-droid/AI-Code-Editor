@@ -1,12 +1,11 @@
-import { api } from "../utils/axios";
+import { api } from "../utils/axios"
 
-export const logout = async () => {
+export const logout=async () => {
     try {
-        const {data} = await api.post('/api/auth/logout')
-        console.log(data)
+        const {data}=await api.get("/api/auth/logout")
         return data
-    } catch(err) {
-        console.log(err)
+    } catch (error) {
+        console.log(error)
         return null
     }
 }

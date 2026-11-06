@@ -1,12 +1,24 @@
 import { motion } from "motion/react"
-import { FolderTree, RefreshCcw } from 'lucide-react'
+import { FilePlus2, FolderPlus, FolderTree, RefreshCcw } from 'lucide-react'
+import { useState } from 'react'
 import Folder from './Folder'
+import CreateEntryModal from './CreateEntryModal'
 function Explorer(
     {
-        projectId, tree, reloadTree,openFile
+        projectId, tree = [], reloadTree, openFile
     }
 ) {
+    const entries = Array.isArray(tree) ? tree : []
+    const [createEntry, setCreateEntry] = useState(null)
+    const rootFolder = entries.find((node) => node?.type === "folder")
+
+    const openCreateDialog = (kind, parentId = rootFolder?._id) => {
+        if (!parentId) return
+        setCreateEntry({ kind, parentId })
+    }
+
     return (
+        <>
         <motion.div
             initial={{ opacity: 0, x: -16, width: 0 }}
             animate={{ opacity: 1, x: 0, width: 288 }}
@@ -21,16 +33,39 @@ function Explorer(
                     EXPLORER
                 </span>
 
-                <motion.button
-                    whileHover={{ rotate: 60 }}
-                    whileTap={{ scale: 0.9 }}
-                    transition={{ duration: 0.2 }}
-                    onClick={reloadTree}
-                    className="rounded-md p-1 text-zinc-400 transition-colors hover:bg-white/[0.07] hover:text-white"
-                    title="Refresh"
-                >
-                    <RefreshCcw size={14} />
-                </motion.button>
+                <div className="flex items-center gap-1">
+                    <button
+                        type="button"
+                        onClick={() => openCreateDialog("file")}
+                        disabled={!rootFolder}
+                        className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-white/[0.07] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                        title={rootFolder ? "New file in project root" : "Project root folder is not available"}
+                        aria-label="Create file in project root"
+                    >
+                        <FilePlus2 size={14} />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => openCreateDialog("folder")}
+                        disabled={!rootFolder}
+                        className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-white/[0.07] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                        title={rootFolder ? "New folder in project root" : "Project root folder is not available"}
+                        aria-label="Create folder in project root"
+                    >
+                        <FolderPlus size={14} />
+                    </button>
+                    <motion.button
+                        whileHover={{ rotate: 60 }}
+                        whileTap={{ scale: 0.9 }}
+                        transition={{ duration: 0.2 }}
+                        onClick={reloadTree}
+                        className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-white/[0.07] hover:text-white"
+                        title="Refresh"
+                        aria-label="Refresh files"
+                    >
+                        <RefreshCcw size={14} />
+                    </motion.button>
+                </div>
             </div>
 
             <div className='
@@ -44,21 +79,24 @@ function Explorer(
         '
                 style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.1) transparent" }}
             >
-                {tree.length == 0 ? (
+                {entries.length === 0 ? (
                     <div className='flex flex-col items-center gap-2 px-3 py-10 text-center'>
                         <FolderTree size={22} className="text-zinc-700" />
-                        <span className="text-[12px] text-zinc-600">Empty WorkSpace</span>
+                        <span className="text-[12px] text-zinc-400">Project root folder is unavailable</span>
+                        <span className="text-[11px] text-zinc-600">Create or reload the project root to add files and folders.</span>
 
                     </div>
                 ) : (
 
-                    tree.map((node) => (
+                    entries.map((node) => (
                         <Folder
+                            key={node._id}
                             projectId={projectId}
                             node={node}
                             tree={tree}
                             reloadTree={reloadTree}
                             openFile={openFile}
+                            onCreateEntry={openCreateDialog}
                         />
                     ))
 
@@ -66,6 +104,16 @@ function Explorer(
             </div>
 
         </motion.div>
+        {createEntry && rootFolder && (
+            <CreateEntryModal
+                kind={createEntry.kind}
+                projectId={projectId}
+                parentId={createEntry.parentId}
+                onClose={() => setCreateEntry(null)}
+                onCreated={reloadTree}
+            />
+        )}
+        </>
     )
 }
 

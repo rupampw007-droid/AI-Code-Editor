@@ -1,4 +1,5 @@
 import { Bot, Files, SquareTerminal } from 'lucide-react'
+import React from 'react'
 import { useState } from 'react'
 import { AnimatePresence, motion } from "motion/react"
 function ActivityIcon({ icon: Icon, label, active, onClick }) {

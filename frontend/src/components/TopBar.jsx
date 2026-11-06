@@ -1,5 +1,7 @@
+import React from 'react'
 import { useSelector } from 'react-redux'
 import { motion } from "motion/react"
+import { useState } from 'react'
 import { Code2, Eye } from 'lucide-react'
 function TopBar({showPreview,setShowPreview}) {
     const { currentProject } = useSelector(state => state.project)
