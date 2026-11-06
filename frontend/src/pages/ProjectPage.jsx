@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux'
 import { setCurrentProject } from '../redux/projectSlice'
 import { useEffect } from 'react'
 import { useState } from 'react'
-import { getTree } from '../features/file'
+import { createRootFolder, getTree } from '../features/file'
 import { Bot, Code2, Eye, Files, Maximize2, Minimize2, TerminalSquare } from 'lucide-react'
 import Preview from '../components/Preview'
 import Editor from '../components/Editor'
@@ -34,7 +34,16 @@ function ProjectPage() {
   }
   const loadTree = async () => {
     const data = await getTree(id)
-    setTree(data)
+    if (Array.isArray(data) && data.length === 0) {
+      const project = await getProjectById(id)
+      if (project?.name) {
+        await createRootFolder({ projectId: id, projectName: project.name })
+        const refreshedTree = await getTree(id)
+        setTree(Array.isArray(refreshedTree) ? refreshedTree : [])
+        return
+      }
+    }
+    setTree(Array.isArray(data) ? data : [])
   }
 
   useEffect(() => {

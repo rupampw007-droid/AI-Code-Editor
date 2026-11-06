@@ -1,5 +1,5 @@
 import { signInWithPopup } from 'firebase/auth';
-import  { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { FcGoogle } from "react-icons/fc";
 import { auth, googleProvider } from '../../firebase';
 import { login } from '../features/login';
@@ -7,16 +7,17 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserData } from '../redux/userSlice';
 import NavBar from '../components/NavBar';
-import Sidebar from '../components/Sidebar';
+import SideBar from '../components/SideBar';
 import { Folder, Loader2, Menu, Plus, X } from 'lucide-react';
 import { getProjects, getStarredProjects } from '../features/project';
-import { setProjects, setStarredProjects } from '../redux/projectSlice';
+import { setProjects } from '../redux/projectSlice';
 import ProjectCard from '../components/ProjectCard';
 import CreateProjectModal from '../components/CreateProjectModal';
 
 
 function Dashboard() {
     const [loading, setLoading] = useState(false)
+    const [loginError, setLoginError] = useState("")
     const [activeSession, setActiveSession] = useState("projects")
     const [loadingProjects, setLoadingProjects] = useState(false)
     const [openModal, setOpenModal] = useState(false)
@@ -24,32 +25,42 @@ function Dashboard() {
     const dispatch = useDispatch()
     const { userData } = useSelector(state => state.user)
     const { projects, starredProjects } = useSelector(state => state.project)
-    const displayedProjects = activeSession === "starred" ? starredProjects : projects
     const handleLogin = async () => {
         setLoading(true)
-        const result = await signInWithPopup(auth, googleProvider)
-        const token = await result.user.getIdToken()
-        const data = await login(token)
-        dispatch(setUserData(data))
-        setLoading(false)
-
+        setLoginError("")
+        try {
+            const result = await signInWithPopup(auth, googleProvider)
+            const token = await result.user.getIdToken()
+            const data = await login(token)
+            dispatch(setUserData(data))
+        } catch (error) {
+            setLoginError(
+                error?.response?.data?.message ||
+                error?.message ||
+                "Google sign-in failed. Please try again."
+            )
+        } finally {
+            setLoading(false)
+        }
     }
 
     const fetchAllProjects = async () => {
         setLoadingProjects(true)
         const data = await getProjects()
-        if(data) dispatch(setProjects(data))
+        dispatch(setProjects(data))
         setLoadingProjects(false)
     }
 
     const fetchStarredProjects = async () => {
         setLoadingProjects(true)
         const data = await getStarredProjects()
-        if (data) dispatch(setStarredProjects(data))
+        dispatch(setProjects(data))
         setLoadingProjects(false)
     }
 
     useEffect(() => {
+        if (!userData) return
+
         if (activeSession == "projects") {
             fetchAllProjects()
         } else {
@@ -84,6 +95,11 @@ function Dashboard() {
                         <FcGoogle />
                         {loading ? "Signing in..." : "Continue with Google"}
                     </button>
+                    {loginError && (
+                        <p role="alert" className="mt-3 text-left text-xs text-red-600 dark:text-red-400">
+                            {loginError}
+                        </p>
+                    )}
 
                     <p className='mt-5 text-[11px] text-slate-400 dark:text-slate-600'>By continuing you agree to our Terms & Privacy Policy.</p>
 
@@ -106,7 +122,7 @@ function Dashboard() {
                 />
                 <div className='flex min-h-0 flex-1'>
                     <div className='hidden md:block'>
-                        <Sidebar activeSession={activeSession} setActiveSession={setActiveSession} />
+                        <SideBar activeSession={activeSession} setActiveSession={setActiveSession} />
                     </div>
 
                     {mobileSideBarOpen && (
@@ -124,7 +140,7 @@ function Dashboard() {
                                         <X size={18} />
                                     </button>
                                 </div>
-                                <Sidebar activeSession={activeSession} setActiveSession={setActiveSession} />
+                                <SideBar activeSession={activeSession} setActiveSession={setActiveSession} />
                             </div>
                         </div>
                     )}
@@ -227,7 +243,7 @@ Menu
                                     className="animate-spin text-slate-400 dark:text-slate-500"
                                 />
                             </div>
-                        ) : displayedProjects?.length == 0 ? (
+                        ) : projects?.length == 0 ? (
                             <div className='mb-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white/40  px-4
                   py-12
                   sm:py-16
@@ -259,8 +275,8 @@ Menu
                   lg:grid-cols-3
                   xl:grid-cols-4
 '>
-                                {displayedProjects?.map((p) => (
-                                    <ProjectCard key={p._id} project={p} />
+                                {projects?.map((p, i) => (
+                                    <ProjectCard project={p} />
                                 ))}
                             </div>
                         )}

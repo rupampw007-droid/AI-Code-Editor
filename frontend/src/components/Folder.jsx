@@ -1,34 +1,17 @@
-
-import {  motion } from "motion/react"
-import { ChevronRight,  FilePlus2, FolderClosed, FolderOpen, FolderPlus, Pencil, Trash } from 'lucide-react'
+import { motion } from "motion/react"
+import { ChevronRight, FilePlus2, FolderClosed, FolderOpen, FolderPlus, Pencil, Trash } from 'lucide-react'
 import { useState } from 'react'
 import { getFileIcon, getFolderColor } from '../utils/customizeIcon'
-import { createFile, createFolder, deleteFile, updateFile } from '../features/file'
+import { deleteFile, updateFile } from '../features/file'
 import { createPortal } from "react-dom"
 function Folder({
-    projectId, tree, reloadTree, node,openFile
+    projectId, tree, reloadTree, node, openFile, onCreateEntry
 }) {
-    const [folderName, setFolderName] = useState("")
-    const [fileName, setFileName] = useState("")
-  
     const [open, setOpen] = useState(false)
     const folderColor = getFolderColor(node?.name)
-    const [creatingFolderIn, setCreatingFolderIn] = useState(null)
-    const [creatingFileIn, setCreatingFileIn] = useState(null)
     const [menu, setMenu] = useState(null)
     const [renaming, setRenaming] = useState(false)
     const [renameValue, setRenameValue] = useState("")
-    const handleCreateFolder = async () => {
-        await createFolder({ projectId, name: folderName, parentId: node?._id })
-        await reloadTree()
-    }
-
-    const handleCreateFile = async () => {
-        const lang=fileName.split(".").pop()
-        await createFile({ projectId, name: fileName, parentId: node?._id,language:lang })
-        await reloadTree()
-    }
-
     const handleDeleteFile = async () => {
         await deleteFile(node?._id)
         await reloadTree()
@@ -37,17 +20,6 @@ function Folder({
         await updateFile({ name: renameValue, id: node?._id, content: node?.content })
         await reloadTree()
     }
-
-    const handleNewFolder = (folder) => {
-        setCreatingFolderIn(folder._id)
-        setCreatingFileIn(null)
-    }
-
-    const handleNewFile = (folder) => {
-        setCreatingFileIn(folder._id)
-        setCreatingFolderIn(null)
-    }
-
 
     if (node.type == "file") {
 
@@ -204,14 +176,17 @@ function Folder({
                 </div>
 
 
-                <div className='hidden items-center gap-0.5 group-hover:flex'>
+                <div className='flex items-center gap-0.5'>
                     <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.92 }}
-                        className="rounded-md p-1 text-zinc-500 hover:bg-white/10 hover:text-white"
+                        type="button"
+                        title="New file in this folder"
+                        aria-label={`Create file in ${node.name}`}
+                        className="rounded-md p-1 text-zinc-400 hover:bg-white/10 hover:text-white"
                         onClick={(e) => {
                             e.stopPropagation();
-                            handleNewFile(node)
+                            onCreateEntry("file", node._id)
                             setOpen(true);
                         }}
 
@@ -222,10 +197,13 @@ function Folder({
                     <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.92 }}
-                        className="rounded-md p-1 text-zinc-500 hover:bg-white/10 hover:text-white"
+                        type="button"
+                        title="New folder in this folder"
+                        aria-label={`Create folder in ${node.name}`}
+                        className="rounded-md p-1 text-zinc-400 hover:bg-white/10 hover:text-white"
                         onClick={(e) => {
                             e.stopPropagation();
-                            handleNewFolder(node)
+                            onCreateEntry("folder", node._id)
                             setOpen(true);
                         }}
 
@@ -261,7 +239,7 @@ function Folder({
                                 className="mx-1 flex w-[calc(100%-8px)] items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] text-zinc-300 transition-colors hover:bg-white/[0.06] hover:text-white"
                                 onClick={() => {
                                     setMenu(null);
-                                    handleNewFile(node);
+                                    onCreateEntry("file", node._id);
                                 }}
                             >
                                 <FilePlus2 size={13} />
@@ -272,7 +250,7 @@ function Folder({
                                 className="mx-1 flex w-[calc(100%-8px)] items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] text-zinc-300 transition-colors hover:bg-white/[0.06] hover:text-white"
                                 onClick={() => {
                                     setMenu(null);
-                                    handleNewFolder(node);
+                                    onCreateEntry("folder", node._id);
                                 }}
                             >
                                 <FolderPlus size={13} />
@@ -325,66 +303,13 @@ function Folder({
 
                     {node.children.map((child) => (
                         <Folder
-                            projectId={projectId} tree={tree} openFile={openFile} reloadTree={reloadTree} node={child}
+                            key={child._id}
+                            projectId={projectId} tree={tree} openFile={openFile} reloadTree={reloadTree} node={child} onCreateEntry={onCreateEntry}
                         />
                     ))}
                 </motion.div>
             )}
 
-
-            {
-                (creatingFolderIn === node._id) && (
-                    <div className='py-1 pl-1'>
-                        <motion.input
-                            initial={{ opacity: 0, y: -4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            autoFocus
-                            value={folderName}
-                            placeholder="Folder Name"
-                            className="w-full rounded-md border border-white/[0.1] bg-white/[0.04] px-2.5 py-1.5 text-[13px] text-white placeholder-zinc-500 outline-none transition-all focus:border-sky-400/50 focus:ring-2 focus:ring-sky-400/15"
-                            onChange={(e) => setFolderName(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                    handleCreateFolder();
-                                    setFolderName("")
-                                    setCreatingFolderIn(null);
-                                };
-                                if (e.key === "Escape") {
-                                    setFolderName("");
-                                    setCreatingFolderIn(null);
-                                }
-                            }}
-                        />
-                    </div>
-                )
-            }
-
-            {
-                (creatingFileIn === node._id) && (
-                    <div className='py-1 pl-1'>
-                        <motion.input
-                            initial={{ opacity: 0, y: -4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            autoFocus
-                            value={fileName}
-                            placeholder="File Name"
-                            className="w-full rounded-md border border-white/[0.1] bg-white/[0.04] px-2.5 py-1.5 text-[13px] text-white placeholder-zinc-500 outline-none transition-all focus:border-sky-400/50 focus:ring-2 focus:ring-sky-400/15"
-                            onChange={(e) => setFileName(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                    handleCreateFile();
-                                    setFileName("")
-                                    setCreatingFileIn(null);
-                                };
-                                if (e.key === "Escape") {
-                                    setFileName("");
-                                    setCreatingFileIn(null);
-                                }
-                            }}
-                        />
-                    </div>
-                )
-            }
 
             {
                 renaming && (

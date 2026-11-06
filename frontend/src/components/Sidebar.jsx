@@ -1,10 +1,12 @@
+import React, { act } from 'react'
 import { motion } from "motion/react"
 import { Coins, Folder, Star, Zap } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { useSelector } from 'react-redux'
-function Sidebar({ activeSession, setActiveSession }) {
+function SideBar({ activeSession, setActiveSession }) {
     const navigate = useNavigate()
-    const userData=useSelector(state=>state.user?.userData)
+    const {userData}=useSelector(state=>state.user)
     return (
         <div className='flex h-full w-64 shrink-0 flex-col border-r border-slate-200/70 bg-white/60 px-3 py-5 font-sans backdrop-blur-xl transition-colors duration-300 dark:border-white/[0.06] dark:bg-white/[0.02]'>
             <div className='flex flex-col gap-1'>
@@ -116,4 +118,4 @@ function Sidebar({ activeSession, setActiveSession }) {
     )
 }
 
-export default Sidebar
+export default SideBar

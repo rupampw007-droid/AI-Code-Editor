@@ -1,12 +1,12 @@
-import { api } from "../utils/axios";
 
-export const me = async (token) => {
+import { api } from "../utils/axios"
+
+export const me=async () => {
     try {
-        const {data} = await api.get('/api/me', {token})
-        console.log(data)
+        const {data}=await api.get("/api/me")
         return data
-    } catch(err) {
-        console.log(err)
+    } catch (error) {
+        console.log(error)
         return null
     }
 }

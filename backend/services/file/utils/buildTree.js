@@ -1,23 +1,24 @@
 export const buildTree = (files) => {
-    let map = {};
-    let tree = [];
-
-    files.forEach(file => {
-        map[files._id.toString()] = {
-            ...file.toObject(),
-            children: []
-        }
-    });
+    const nodes = new Map(
+        files.map(file => [
+            file._id.toString(),
+            {
+                ...file.toObject(),
+                children: []
+            }
+        ])
+    );
+    const tree = [];
 
     files.forEach(file => {
         const id = file._id.toString()
         if(file.parentId) {
-            let parent = map[file.parentId.toString()]
+            const parent = nodes.get(file.parentId.toString())
              if(parent) {
-                parent.children.push(map[id])
+                parent.children.push(nodes.get(id))
              }
         } else {
-            tree.push(map[id])
+            tree.push(nodes.get(id))
         }
     })
     return tree
